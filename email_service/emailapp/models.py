@@ -1,4 +1,5 @@
 from django.db import models
+from datetime import datetime, date
 
 # Create your models here.
 
@@ -30,7 +31,8 @@ class MailingList(models.Model):
 class Mailing(models.Model):
     title =models.CharField(max_length=30, blank=True, unique=True)
     mailing_list = models.ForeignKey(MailingList, null=True,  on_delete=models.SET_NULL)
-    mailing_date = models.DateField(auto_now=True)
+    mailing_date = models.DateField()
+    mailing_status = models.BooleanField(default=False, null=True)
     class Meta:
         ordering = ['title']
 
@@ -43,5 +45,5 @@ class MailingReceiver(models.Model):
     receiver = models.ForeignKey(Receiver, on_delete=models.CASCADE)
     send = models.BooleanField(default=False)
     received = models.BooleanField(default=False)
-    send_date = models.DateField()
-    received_date = models.DateField()
+    send_date = models.DateTimeField(blank=True)
+    received_date = models.DateTimeField(blank=True)

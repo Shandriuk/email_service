@@ -1,16 +1,13 @@
 from django.shortcuts import render
-
-# Create your views here.
-
-from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.core.mail import send_mail, BadHeaderError
 from django.core import serializers
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, redirect
 from .forms import  EmailForm
-from .models import Receiver, MailingList
+from .models import Receiver, MailingList, Mailing, MailingReceiver
 import json
+from datetime import date
 from django.conf import settings
 
 @csrf_exempt
@@ -68,6 +65,45 @@ def mailing_list(request):
         else:
             return HttpResponse("Nothing to add")
         return HttpResponse(status=200)
+
+@csrf_exempt
+def mailing(request):
+    if request.method == 'GET':
+        data = Mailing.objects.all()
+        data_json = serializers.serialize('json', data)
+        return JsonResponse(json.loads(data_json), safe=False)
+    elif request.method == 'POST':
+        mailing_req = json.loads(request.body)
+
+        if mailing_req.get("pk"):
+            try:
+                mailing_list = MailingList.objects.get(pk=mailing_req["pk"])
+            except:
+                pass
+        elif mailing_req.get("ml_title"):
+            try:
+                mailing_list = MailingList.objects.get(title=mailing_req["ml_title"])
+            except:
+                pass
+        else:
+            return HttpResponse("Nothing to add")
+
+        if mailing_req.get("mailing_date"):
+            mailing_date = mailing_req["mailing_date"]
+        else:
+            mailing_date = date.today()
+        try:
+            print(mailing_req["title"], mailing_list, mailing_date)
+            new_obj = Mailing.objects.create(
+                title=mailing_req["title"],
+                mailing_date=mailing_date,
+                mailing_list=mailing_list
+            )
+        except :
+            return HttpResponse("something goes wrong")
+
+        return HttpResponse(status=200)
+
 
 def add_emails(request):
     if request.method == 'GET':
