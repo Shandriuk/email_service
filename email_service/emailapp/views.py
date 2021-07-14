@@ -1,14 +1,16 @@
-from django.shortcuts import render
+import datetime
+
 from django.views.decorators.csrf import csrf_exempt
-from django.core.mail import send_mail, BadHeaderError
 from django.core import serializers
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
-from django.shortcuts import render, redirect
-from .forms import  EmailForm
-from .models import Receiver, MailingList, Mailing, MailingReceiver
+
+import os
+from .models import Receiver, MailingList, Mailing, MailingReceiver, HtmlTemplate
 import json
-from datetime import date
+from datetime import date, datetime
 from django.conf import settings
+from .tasks import send_email, sending
+
 
 @csrf_exempt
 def emails(request):
@@ -19,15 +21,14 @@ def emails(request):
     elif request.method == 'POST':
 
         email_req = json.loads(request.body)
-        print(email_req["email"], email_req["name"], email_req["surname"], email_req["bday"])
 
         try:
             new_obj = Receiver.objects.create(email=email_req["email"],
                                 name=email_req["name"],
-                                surname=email_req["surname"],
+                                lastname=email_req["lastname"],
                                 bday=email_req["bday"])
             new_obj.save()
-        except :
+        except ZeroDivisionError:
             return HttpResponse("something goes wrong")
 
         return HttpResponse(status=200)
@@ -56,7 +57,7 @@ def mailing_list(request):
                     Receiver.objects.create(email=email)
         if len(adding_emails)!=0:
             try:
-                new_obj = MailingList(title=mailing_list_req["title"])
+                new_obj = MailingList(mailinglist_name=mailing_list_req["mailinglist_name"])
                 new_obj.save()
                 for elem in adding_emails:
                     new_obj.receivers.add(elem)
@@ -75,77 +76,106 @@ def mailing(request):
     elif request.method == 'POST':
         mailing_req = json.loads(request.body)
 
-        if mailing_req.get("pk"):
-            try:
-                mailing_list = MailingList.objects.get(pk=mailing_req["pk"])
-            except:
-                pass
-        elif mailing_req.get("ml_title"):
-            try:
-                mailing_list = MailingList.objects.get(title=mailing_req["ml_title"])
-            except:
-                pass
+        if mailing_req.get("ml_pk") or mailing_req.get("ml_name"):
+            if mailing_req.get("ml_pk"):
+                try:
+                    mailing_list = MailingList.objects.get(pk=mailing_req["ml_pk"])
+                except:
+                    pass
+            else:
+                try:
+                    mailing_list = MailingList.objects.get(mailinglist_name=mailing_req["ml_name"])
+                except:
+                    pass
         else:
-            return HttpResponse("Nothing to add")
+            return HttpResponse("Please add ml_pk or ml_name fields")
+
+        if mailing_req.get("ht_pk") or mailing_req.get("ht_name"):
+            if mailing_req.get("ht_pk"):
+                try:
+                    mailing_template = HtmlTemplate.objects.get(pk=mailing_req["ht_pk"])
+                except:
+                    pass
+            else:
+                try:
+                    mailing_template = HtmlTemplate.objects.get(template_name=mailing_req["ht_name"])
+                except:
+                    pass
+        else:
+            return HttpResponse("Please add ht_pk or ht_name fields")
+
+
 
         if mailing_req.get("mailing_date"):
             mailing_date = mailing_req["mailing_date"]
         else:
             mailing_date = date.today()
         try:
-            print(mailing_req["title"], mailing_list, mailing_date)
+            #print(mailing_req["title"], mailing_list, mailing_date)
             new_obj = Mailing.objects.create(
-                title=mailing_req["title"],
+                mailing_name=mailing_req["mailing_name"],
                 mailing_date=mailing_date,
-                mailing_list=mailing_list
+                mailing_list=mailing_list,
+                mailing_subject=mailing_req["subject"],
+                mailing_template=mailing_template
             )
         except :
             return HttpResponse("something goes wrong")
 
         return HttpResponse(status=200)
 
+def sending_test(request):
+    objs = Mailing.objects.filter(mailing_status=False).filter(mailing_date__lte=date.today())
+    if objs:
+        for mailing in objs:
 
-def add_emails(request):
+            mailinglist = MailingList.objects.get(pk=mailing.mailing_list_id)
+            emails = mailinglist.receivers.all()
+            for email in emails:
+                MailingReceiver.objects.create(mailing=mailing, receiver=email)
+                send_email.delay(email.pk)
+            mailing.mailing_status = True
+            mailing.save()
+
+@csrf_exempt
+def start_mailing(request):
     if request.method == 'GET':
-        form = EmailForm()
+        active_mailing = Mailing.objects.filter(mailing_status=True)
+        data_json = serializers.serialize('json', active_mailing)
+        return JsonResponse(json.loads(data_json), safe=False)
     elif request.method == 'POST':
-        # если метод POST, проверим форму и отправим письмо
-        form = EmailForm(request.POST)
-        if form.is_valid():
-            #"email", "name", "surname", "bday"
-            new_obj = Receiver.objects.create(email=request.POST["email"],
-                                               name=request.POST["name"],
-                                               surname=request.POST["surname"],
-                                               bday=request.POST["bday"]
-                                               )
-            new_obj.save()
-            return HttpResponse('Email added')
-    else:
-        return HttpResponse('Request ERROR')
-    return render(request, "emailapp/addemail.html", {'form': form})
+        sending.delay()
+        return HttpResponse('You start all needed mailing')
 
-'''
-
-def contact_view(request):
-    # если метод GET, вернем форму
+@csrf_exempt
+def templates(request):
     if request.method == 'GET':
-        form = ContactForm()
+        active_mailing = HtmlTemplate.objects.all()
+        data_json = serializers.serialize('json', active_mailing)
+        return JsonResponse(json.loads(data_json), safe=False)
     elif request.method == 'POST':
-        # если метод POST, проверим форму и отправим письмо
-        form = ContactForm(request.POST)
-        if form.is_valid():
-            subject = form.cleaned_data['subject']
-            from_email = form.cleaned_data['from_email']
-            message = form.cleaned_data['message']
+        template_req = json.loads(request.body)
+        if template_req.get("template_location") and template_req.get("template_name"):
             try:
-                send_mail(f'{subject} от {from_email}', message,
-                          settings.DEFAULT_FROM_EMAIL, settings.RECIPIENTS_EMAIL)
-            except BadHeaderError:
-                return HttpResponse('Ошибка в теме письма.')
-            return redirect('success')
-    else:
-        return HttpResponse('Неверный запрос.')
-    return render(request, "email.html", {'form': form})
+                HtmlTemplate.objects.create(
+                    template_location=template_req["template_location"],
+                    template_name=template_req["template_name"]
+                )
+            except:
+                return HttpResponse("something goes wrong")
+            return HttpResponse(status=200)
+        else:
+            return HttpResponse('Nothing to add')
 
-def success_view(request):
-    return HttpResponse('Приняли! Спасибо за вашу заявку.')'''
+
+
+def open_tracking(request, pk=None):
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    #image_data = open(os.path.join(script_dir, 'static/img/open-tracking/pixel.png'), 'rb').read()
+    mr_obj = MailingReceiver.object.get(pk=pk)
+    mr_obj.received=True
+    mr_obj.received_date=datetime.now()
+    mr_obj.save()
+    ###Record somewhere that user_id has viewed the email
+
+    return HttpResponse("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=", content_type="image/png")

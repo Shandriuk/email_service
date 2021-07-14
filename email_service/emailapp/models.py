@@ -7,7 +7,7 @@ from datetime import datetime, date
 class Receiver(models.Model):
     email = models.EmailField(max_length=50, unique=True)
     name = models.CharField(max_length=20, blank=True)
-    surname = models.CharField(max_length=20, blank=True)
+    lastname = models.CharField(max_length=20, blank=True)
     bday = models.DateField(auto_now=False, blank=True)
 
     class Meta:
@@ -16,34 +16,40 @@ class Receiver(models.Model):
     def __str__(self):
         return self.email
 
+class HtmlTemplate(models.Model):
+    template_location = models.CharField(max_length=30)
+    template_name = models.CharField(max_length=30, unique=True)
 
 class MailingList(models.Model):
-    title = models.CharField(max_length=30, blank=True, unique=True)
+    mailinglist_name = models.CharField(max_length=30, unique=True)
     receivers = models.ManyToManyField(Receiver)
 
     class Meta:
-        ordering = ['title']
+        ordering = ['mailinglist_name']
 
     def __str__(self):
-        return self.title
+        return self.mailinglist_name
 
 
 class Mailing(models.Model):
-    title =models.CharField(max_length=30, blank=True, unique=True)
-    mailing_list = models.ForeignKey(MailingList, null=True,  on_delete=models.SET_NULL)
+    mailing_name = models.CharField(max_length=30, unique=True)
+    mailing_list = models.ForeignKey(MailingList, on_delete=models.CASCADE)
     mailing_date = models.DateField()
     mailing_status = models.BooleanField(default=False, null=True)
+    mailing_subject = models.CharField(max_length=30, blank=True)
+    mailing_template = models.ForeignKey(HtmlTemplate,  on_delete=models.CASCADE)
     class Meta:
-        ordering = ['title']
+        ordering = ['mailing_name']
 
     def __str__(self):
-        return self.title
+        return self.mailing_name
 
 
 class MailingReceiver(models.Model):
-    mailing = models.ForeignKey(MailingList, on_delete=models.CASCADE)
+    mailing = models.ForeignKey(Mailing, on_delete=models.CASCADE)
     receiver = models.ForeignKey(Receiver, on_delete=models.CASCADE)
-    send = models.BooleanField(default=False)
+    send = models.BooleanField(default=True)
+    send_date = models.DateTimeField(auto_now=True)
     received = models.BooleanField(default=False)
-    send_date = models.DateTimeField(blank=True)
-    received_date = models.DateTimeField(blank=True)
+    received_date = models.DateTimeField(blank=True, null=True)
+
