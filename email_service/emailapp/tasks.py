@@ -30,16 +30,14 @@ def send_email(pk):
     template_dict = model_to_dict(receiver)
     template = HtmlTemplate.objects.get(pk=mailing.mailing_template_id)
     template_dir = settings.DEFAULT_TEMPLATES_DIR + "/mailing/" + template.template_location
-    html_message = render_to_string(template_dir, template_dict)
-    html_message = html_message[:html_message.find("</body>")] \
-                   + f'<img src="{settings.PROJECT_DOMAIN}/open-tracking/{pk}/">' \
-                   + html_message[html_message.find("</body>"):]
+    html= render_to_string(template_dir, template_dict)
+    tracking_img = f'<img src="{settings.PROJECT_DOMAIN}open-tracking/{pk}/">'
+    html_message = html[:html.find("</body>")] + tracking_img + html[html.find("</body>"):]
     plain_message = strip_tags(html_message)
 
     subject = mailing.mailing_subject
     from_email = settings.EMAIL_HOST_USER
     to = receiver.email
-
 
     send_mail(subject, plain_message, from_email, [to], html_message=html_message)
 

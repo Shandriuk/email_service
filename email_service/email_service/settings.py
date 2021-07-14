@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-ql)8)#)ry*%gk#7g&&(p96i1-)v#+x0fn2@305te7$tks+m@6*
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -127,21 +127,15 @@ STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Project domain
+PROJECT_DOMAIN = 'YOUR_URL'
 # Email service
-'''
-RECIPIENTS_EMAIL = ['manager@mysite.com']   # замените на свою почту
-DEFAULT_FROM_EMAIL = 'admin@mysite.com'  # замените на свою почту
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'your_account@gmail.com'
-EMAIL_HOST_PASSWORD = 'your_password'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True'''
 EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST='smtp.gmail.com'
 EMAIL_PORT=587
-
+EMAIL_HOST_USER='Your Email'
+EMAIL_HOST_PASSWORD='Your Password'
 EMAIL_USE_TLS=True
 
 # REDIS related settings
@@ -156,3 +150,6 @@ CELERY_BROKER_URL = 'redis://' + REDIS_HOST + ':' + REDIS_PORT + '/0'
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
+
+
+

@@ -13,6 +13,6 @@ celery_app.autodiscover_tasks()
 celery_app.conf.beat_schedule = {
     'send-report-every-single-minute': {
         'task': 'publisher.tasks.sending',
-        'schedule': crontab(minute=15),  # change to `crontab(minute=0, hour=0)` if you want it to run daily at midnight
+        'schedule': crontab(minute=0, hour=0),  # change to `crontab(minute=0, hour=0)` if you want it to run daily at midnight
     },
 }

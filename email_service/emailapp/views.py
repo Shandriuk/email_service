@@ -4,7 +4,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core import serializers
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 
-import os
+import pytz
+from os import path
 from .models import Receiver, MailingList, Mailing, MailingReceiver, HtmlTemplate
 import json
 from datetime import date, datetime
@@ -104,8 +105,6 @@ def mailing(request):
         else:
             return HttpResponse("Please add ht_pk or ht_name fields")
 
-
-
         if mailing_req.get("mailing_date"):
             mailing_date = mailing_req["mailing_date"]
         else:
@@ -124,18 +123,6 @@ def mailing(request):
 
         return HttpResponse(status=200)
 
-def sending_test(request):
-    objs = Mailing.objects.filter(mailing_status=False).filter(mailing_date__lte=date.today())
-    if objs:
-        for mailing in objs:
-
-            mailinglist = MailingList.objects.get(pk=mailing.mailing_list_id)
-            emails = mailinglist.receivers.all()
-            for email in emails:
-                MailingReceiver.objects.create(mailing=mailing, receiver=email)
-                send_email.delay(email.pk)
-            mailing.mailing_status = True
-            mailing.save()
 
 @csrf_exempt
 def start_mailing(request):
@@ -170,12 +157,12 @@ def templates(request):
 
 
 def open_tracking(request, pk=None):
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    #image_data = open(os.path.join(script_dir, 'static/img/open-tracking/pixel.png'), 'rb').read()
-    mr_obj = MailingReceiver.object.get(pk=pk)
-    mr_obj.received=True
-    mr_obj.received_date=datetime.now()
-    mr_obj.save()
-    ###Record somewhere that user_id has viewed the email
 
-    return HttpResponse("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=", content_type="image/png")
+    image_data = open(path.join(settings.BASE_DIR, 'static/img/open-tracking/pixel.png'), 'rb').read()
+    mr_obj = MailingReceiver.objects.get(pk=pk)
+    if mr_obj.received == False:
+        mr_obj.received=True
+        mr_obj.received_date=datetime.now(tz=pytz.UTC)
+        mr_obj.save()
+
+    return HttpResponse(image_data, content_type="image/png")
