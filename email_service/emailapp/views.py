@@ -45,10 +45,11 @@ def emails(request):
         email_req = json.loads(request.body)
 
         try:
-            new_mail = Receiver.objects.create(email=email_req["email"],
-                                              name=email_req.get("name") if email_req.get("name") else "",
-                                              lastname=email_req.get("lastname") if email_req.get("lastname") else "",
-                                              bday=email_req.get("bday") if email_req.get("bday") else "", )
+            new_mail = Receiver.objects.create(
+                            email=email_req["email"],
+                            name=email_req.get("name") if email_req.get("name") else "",
+                            lastname=email_req.get("lastname") if email_req.get("lastname") else "",
+                            bday=email_req.get("bday") if isinstance(email_req.get("bday"), date) else None)
 
         except IntegrityError:
             return JsonResponse({"status": "fail", "description": "please provide unique email"})
@@ -400,9 +401,9 @@ def templates_edit(request, pk=None):
         except IntegrityError:
             return JsonResponse({"status": "fail", "description": "please provide unique template_name"})
 
-        ht.mailing_signature = ht_req.get("template_location") if ht_req.get("template_location")\
-                              else ht_req.template_location
-        ht.save()
+        if ht_req.get("template_location") and path.exists(settings.DEFAULT_TEMPLATES_DIR + "/mailing/" + ht_req.get("template_location")):
+            ht.mailing_signature = ht_req.get("template_location")
+            ht.save()
 
     elif request.method == 'DELETE':
         ht.delete()
