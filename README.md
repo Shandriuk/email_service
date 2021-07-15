@@ -90,7 +90,7 @@ python email_service with django
  
  In *email_service/email_service/* edit **settings.py**
  
-    PROJECT_DOMAIN = 'http://YOUR_IP_OR_DOMAIN'
+    PROJECT_DOMAIN = 'http://YOUR_IP_OR_DOMAIN:8000'
  
     EMAIL_HOST_USER='YOUR_EMAIL'
     EMAIL_HOST_PASSWORD='YOUR_PASSWORD'
@@ -100,4 +100,4 @@ python email_service with django
     docker-compose build
     docker-compose up
       
-  Project will be available on local machine on http://YOUR_IP 
+  Project will be available on local machine on http://YOUR_IP_OR_DOMAIN:8000
