@@ -128,14 +128,14 @@ STATIC_URL = '/static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Project domain
-PROJECT_DOMAIN = 'YOUR_URL'
+PROJECT_DOMAIN = 'your domain'
 # Email service
 
 EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST='smtp.gmail.com'
 EMAIL_PORT=587
-EMAIL_HOST_USER='Your Email'
-EMAIL_HOST_PASSWORD='Your Password'
+EMAIL_HOST_USER='youremail'
+EMAIL_HOST_PASSWORD='your password'
 EMAIL_USE_TLS=True
 
 # REDIS related settings

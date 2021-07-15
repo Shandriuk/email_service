@@ -27,7 +27,9 @@ def send_email(pk):
     receiver = Receiver.objects.get(pk=obj.receiver_id)
     mailing = Mailing.objects.get(pk=obj.mailing_id)
 
-    template_dict = model_to_dict(receiver)
+    template_dict = model_to_dict(receiver) + {"subject":mailing.mailing_subject,
+                                               "body":mailing.mailing_body,
+                                               "signature":mailing.mailing_signature}
     template = HtmlTemplate.objects.get(pk=mailing.mailing_template_id)
     template_dir = settings.DEFAULT_TEMPLATES_DIR + "/mailing/" + template.template_location
     html= render_to_string(template_dir, template_dict)

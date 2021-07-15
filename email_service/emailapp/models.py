@@ -8,7 +8,7 @@ class Receiver(models.Model):
     email = models.EmailField(max_length=50, unique=True)
     name = models.CharField(max_length=20, blank=True)
     lastname = models.CharField(max_length=20, blank=True)
-    bday = models.DateField(auto_now=False, blank=True)
+    bday = models.DateField(auto_now=False, blank=True, null=True)
 
     class Meta:
         ordering = ['email']
@@ -35,8 +35,10 @@ class Mailing(models.Model):
     mailing_name = models.CharField(max_length=30, unique=True)
     mailing_list = models.ForeignKey(MailingList, on_delete=models.CASCADE)
     mailing_date = models.DateField()
-    mailing_status = models.BooleanField(default=False, null=True)
-    mailing_subject = models.CharField(max_length=30, blank=True)
+    mailing_status = models.BooleanField(default=False)
+    mailing_subject = models.CharField(max_length=30, default="")
+    mailing_body = models.TextField(default="", blank=True)
+    mailing_signature = models.TextField(default="", blank=True)
     mailing_template = models.ForeignKey(HtmlTemplate,  on_delete=models.CASCADE)
     class Meta:
         ordering = ['mailing_name']
