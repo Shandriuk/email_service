@@ -1,7 +1,6 @@
 import datetime
 
 from django.views.decorators.csrf import csrf_exempt
-from django.core import serializers
 from django.http import HttpResponse, JsonResponse
 from django.db.utils import IntegrityError
 
@@ -54,7 +53,7 @@ def emails(request):
         except IntegrityError:
             return JsonResponse({"status": "fail", "description": "please provide unique email"})
 
-        return JsonResponse({"status": "success", "description": f"you added new email{model_to_dict(new_mail)}"})
+        return JsonResponse({"status": "success", "description": f"you added new email {model_to_dict(new_mail)}"})
     else:
         return JsonResponse({"status": "fail", "description": "please provide correct method(GET, POST)"})
 
@@ -274,7 +273,7 @@ def mailing(request):
         except IntegrityError:
             return JsonResponse({"status": "fail", "description": "please provide unique mailing_name"})
 
-        return JsonResponse({"status": "success", "description": "you added new mailing"})
+        return JsonResponse({"status": "success", "description": f"you added new mailing {model_to_dict(new_mailing)}"})
     else:
         return JsonResponse({"status": "fail", "description": "please provide correct method(GET, POST)"})
 
@@ -286,6 +285,16 @@ def mailing_edit(request, pk=None):
         return JsonResponse({"status": "fail", "description": "please provide correct pk"})
 
     if request.method == 'GET':
+        if mlng.mailing_status:
+            mlng_json = model_to_dict(mlng)
+
+            m_r = MailingReceiver.objects.filter(mailing_id=mlng.id)
+            result_of_mailing = []
+            for mails in m_r:
+                result_of_mailing.append(model_to_dict(mails))
+            mlng_json.update({"mailing_result":result_of_mailing})
+
+            return JsonResponse({"status": "success", "results": mlng_json})
         return JsonResponse({"status": "success", "results": model_to_dict(mlng)})
     elif request.method == 'POST':
         mln_req = json.loads(request.body)
@@ -295,19 +304,18 @@ def mailing_edit(request, pk=None):
         except IntegrityError:
             return JsonResponse({"status": "fail", "description": "please provide unique mailing_name"})
 
+        if mln_req.get("mailing_date"):
+            if isinstance(mln_req.get("mailing_date"), datetime.date):
+                mlng.mailing_date = mln_req.get("mailing_date")
 
-        mlng.mailing_date = mln_req.get("mailing_date")\
-            if mln_req.get("mailing_date") and isinstance(mln_req.get("mailing_date"), datetime.date) \
-            else mln_req.mailing_date
+        mlng.mailing_status = False if mln_req.get("mailing_status")=="False" else mlng.mailing_status
 
-        mlng.mailing_status = mln_req.get("mailing_status") if mln_req.get("mailing_status")\
-                              else mln_req.mailing_status
         mlng.mailing_subject =mln_req.get("mailing_subject") if mln_req.get("mailing_subject")\
-                              else mln_req.mailing_subject
+                              else mlng.mailing_subject
         mlng.mailing_body = mln_req.get("mailing_body") if mln_req.get("mailing_body")\
-                              else mln_req.mailing_body
+                              else mlng.mailing_body
         mlng.mailing_signature=mln_req.get("mailing_signature") if mln_req.get("mailing_signature")\
-                              else mln_req.mailing_signature
+                              else mlng.mailing_signature
         mlng.save()
 
         if mln_req.get("mailing_list"):
@@ -358,15 +366,20 @@ def templates(request):
     elif request.method == 'POST':
         template_req = json.loads(request.body)
         if template_req.get("template_location") and template_req.get("template_name"):
-            try:
-                HtmlTemplate.objects.create(
-                    template_location=template_req["template_location"],
-                    template_name=template_req["template_name"]
-                )
-            except IntegrityError:
+            if path.exists(settings.DEFAULT_TEMPLATES_DIR + "/mailing/" + template_req["template_location"]):
+                try:
+                    new_ht = HtmlTemplate.objects.create(
+                        template_location=template_req["template_location"],
+                        template_name=template_req["template_name"]
+                    )
+                except IntegrityError:
+                    return JsonResponse({"status": "fail",
+                                         "description": "Please provide unique template_name"})
+                return JsonResponse({"status": "success", "description": f"you added template {model_to_dict(new_ht)}"})
+            else:
                 return JsonResponse({"status": "fail",
-                                     "description": "Please provide unique template_name"})
-            return JsonResponse({"status": "success", "description": "you added template"})
+                    "description": "Please provide correct template_location that exist in template/mailing folder"})
+
         else:
             return JsonResponse({"status": "fail",
                                  "description": "Please provide correct template_location and template_name"})

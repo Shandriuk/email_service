@@ -4,7 +4,7 @@ from celery.schedules import crontab
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'email_service.settings')
 
-celery_app = Celery('email_service')
+celery_app = Celery('email_service', broker='redis://redis:6379/0')
 celery_app.config_from_object('django.conf:settings')
 
 # Load task modules from all registered Django app configs.

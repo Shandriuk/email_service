@@ -1,0 +1,49 @@
+version: '3.1'
+
+services:
+
+  database:
+    image: postgres
+    restart: always
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: django_db
+    ports:
+      - 5431:5432
+
+  web_service_env:
+    build: .
+    environment:
+      MYENV: env
+    volumes:
+      - .:/email_service:rw
+
+  redis:
+    image: redis:latest
+    container_name: rd01
+
+
+  celery:
+    extends:
+      service: web_service_env
+    depends_on:
+      - redis
+    command: bash celery.sh
+
+  migrate:
+    extends:
+      service: web_service_env
+    depends_on:
+      - web_service_env
+    command: python email_service/manage.py migrate
+
+  runserver:
+    extends:
+      service: web_service_env
+
+    command: python email_service/manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"

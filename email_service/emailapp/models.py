@@ -50,8 +50,8 @@ class Mailing(models.Model):
 class MailingReceiver(models.Model):
     mailing = models.ForeignKey(Mailing, on_delete=models.CASCADE)
     receiver = models.ForeignKey(Receiver, on_delete=models.CASCADE)
-    send = models.BooleanField(default=True)
-    send_date = models.DateTimeField(auto_now=True)
+    send = models.BooleanField(default=False)
+    send_date = models.DateTimeField(blank=True, null=True)
     received = models.BooleanField(default=False)
     received_date = models.DateTimeField(blank=True, null=True)
 

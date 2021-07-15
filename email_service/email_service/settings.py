@@ -78,8 +78,13 @@ WSGI_APPLICATION = 'email_service.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'django_db',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': 'database',
+        #'PORT': '5431',
+
     }
 }
 
@@ -128,25 +133,21 @@ STATIC_URL = '/static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Project domain
-PROJECT_DOMAIN = 'your domain'
+PROJECT_DOMAIN = 'http://YOUR_IP:8000'
 # Email service
 
 EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST='smtp.gmail.com'
 EMAIL_PORT=587
-EMAIL_HOST_USER='youremail'
-EMAIL_HOST_PASSWORD='your password'
+EMAIL_HOST_USER='YOUR_EMAIL'
+EMAIL_HOST_PASSWORD='YOUR_PASSWORD'
 EMAIL_USE_TLS=True
 
-# REDIS related settings
-REDIS_HOST = 'localhost'
-REDIS_PORT = '6379'
-BROKER_URL = 'redis://' + REDIS_HOST + ':' + REDIS_PORT + '/0'
-BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
-CELERY_RESULT_BACKEND = 'redis://' + REDIS_HOST + ':' + REDIS_PORT + '/0'
 
+BROKER_URL = 'redis://redis:6379/0'
+BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
 # celery
-CELERY_BROKER_URL = 'redis://' + REDIS_HOST + ':' + REDIS_PORT + '/0'
+CELERY_BROKER_URL = BROKER_URL
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'

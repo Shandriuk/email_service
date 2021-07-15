@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path, re_path
+from django.urls import path
 
 from .views import emails, mailing_list, mailing, templates, active_mailing, open_tracking, emails_edit
 from .views import mailing_list_edit, mailing_edit, templates_edit
