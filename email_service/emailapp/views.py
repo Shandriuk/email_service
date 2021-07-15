@@ -124,8 +124,8 @@ def mailing_list(request):
         adding_emails = []
         failure_adding = []
 
-        if mailing_list_req.get("pks"):
-            for pk in mailing_list_req["pks"]:
+        if mailing_list_req.get("emails_pk"):
+            for pk in mailing_list_req["emails_pk"]:
                 try:
                     adding_emails.append(Receiver.objects.get(pk=pk))
                 except Receiver.DoesNotExist:

@@ -133,7 +133,7 @@ STATIC_URL = '/static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Project domain
-PROJECT_DOMAIN = 'http://YOUR_IP:8000'
+PROJECT_DOMAIN = 'http://95.165.15.237:8000'
 # Email service
 
 EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend'
