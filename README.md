@@ -78,9 +78,9 @@ python email_service with django
      - POST - edit mailing from database with mailing_id ID
      - DELETE - delete mailing from database with mailing_id ID
     
-     #### If the mailing has already been done, a list of sent letters with additional information will also be displayed.
+     #### If the mailing has already been done, a list of sent letters with additional information will also be displayed
      
-  # 5. The mailing starts at midnight. Use the following command to launch the available mailing today.
+  # 5. The mailing starts at midnight. Use the following command to launch the available mailing today
    - activate_mailing/ 
      - POST - starting all available today mailing
 
