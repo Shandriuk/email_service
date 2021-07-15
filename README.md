@@ -82,7 +82,7 @@ python email_service with django
      
   # 5. The mailing starts at midnight. Use the following command to launch the available mailing today.
    - activate_mailing/ 
-    - POST Starting all available mailing
+     - POST - starting all available today mailing
 
     
  # Launching instruction
