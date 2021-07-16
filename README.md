@@ -70,7 +70,7 @@ python email_service with django
    - mailing/
      - GET - list of all mailing in database 
      - GET ?mailing_name=search_object  show you all mailing that consist search_object                                             
-     - POST - request body {"mailing_name":"Example name", "ml_id": "mailing_list_id",  "mailing_template":"example_mailing_template",
+     - POST - request body {"mailing_name":"Example name", "mailing_list": "mailing_list_id",  "mailing_template":"example_mailing_template",
      "mailing_date":"YYYY-MM-DD", "mailing_body":"example body", "mailing_signature":"example signature"}
     
    - mailing/mailing_id/ 
