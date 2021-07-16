@@ -36,9 +36,9 @@ python email_service with django
 
 # 1. Receiver database interaction
    - email/
-     - GET - return list of all emails in database 
+     - GET - return list of last 50 added emails in database 
      - GET ?email=search_object  show you all emails that consist search_object                                               
-     - POST - request body {"email":"user@example.com", "name":"Boris", "lastname":"Borisov", "bday":"YYYY-MM-DD"}
+     - POST - create new reciever, request body {"email":"user@example.com", "name":"Boris", "lastname":"Borisov", "bday":"YYYY-MM-DD"}
      
    - emails/*email_id*/ 
      - GET - get email from database with *email_id* ID
@@ -47,9 +47,9 @@ python email_service with django
      
  # 2. Mailing list interaction
    - mailing-list/
-     - GET - return list of all mailing list in database 
-     - GET ?mailinglistname=search_object  show you all mailing list that consist search_object                                             
-     - POST - request body {"mailinglist_name":"Example name", "emails_pk": [pk_1, pk_2] OR "emails":[email_1, email_2]}
+     - GET - return list of last 50 added mailing list in database 
+     - GET ?mailinglist_name=search_object  show you all mailing list that consist search_object                                             
+     - POST - create new mailing list, request body {"mailinglist_name":"Example name", "emails_pk": [pk_1, pk_2] OR "emails":[email_1, email_2]}
     
    - mailing-list/*mailing_list_id*/ 
      - GET - get mailing list from database with *mailing_list_id* ID
@@ -58,8 +58,8 @@ python email_service with django
   
  # 3. Templates interaction
    - templates/
-     - GET - return list of all templates in database                                            
-     - POST - request body {"template_name":"Example templat name", "template_location": "example.html"}
+     - GET - return list of last 50 added templates in database                                            
+     - POST - create new template, request body {"template_name":"Example template name", "template_location": "example.html"}
     
    - templates/*templates_i*/ 
      - GET - get template from database with *template_id* ID
@@ -68,9 +68,9 @@ python email_service with django
   
   # 4. Mailing interaction   
    - mailing/
-     - GET - list of all mailing in database 
+     - GET - list of last 50 added mailing in database 
      - GET ?mailing_name=search_object  show you all mailing that consist search_object                                             
-     - POST - request body {"mailing_name":"Example name", "mailing_list": "mailing_list_id",  "mailing_template":"example_mailing_template",
+     - POST - create new mailing, request body {"mailing_name":"Example name", "mailing_list": "mailing_list_id" *OR "mailing_list_name":"example mailing_list name"* ,  "mailing_template":"example_mailing_template_id" *OR "mailing_template_name":"example mailing_template name"* ,
      "mailing_date":"YYYY-MM-DD", "mailing_body":"example body", "mailing_signature":"example signature"}
     
    - mailing/mailing_id/ 
@@ -82,6 +82,7 @@ python email_service with django
      
   # 5. The mailing starts at midnight. Use the following command to launch the available mailing today
    - activate_mailing/ 
+     - GET - return list of not started mailing
      - POST - starting all available today mailing
 
     
