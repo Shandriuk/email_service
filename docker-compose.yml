@@ -32,7 +32,8 @@ services:
     depends_on:
       - redis
     command: bash celery.sh
-
+    
+  
   migrate:
     extends:
       service: web_service_env
@@ -46,4 +47,4 @@ services:
 
     command: python email_service/manage.py runserver 0.0.0.0:8000
     ports:
-      - "80:80"
+      - "8000:8000"

@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-ql)8)#)ry*%gk#7g&&(p96i1-)v#+x0fn2@305te7$tks+m@6*'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 
@@ -133,7 +133,7 @@ STATIC_URL = '/static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Project domain
-PROJECT_DOMAIN = 'http://95.165.15.237:8000'
+PROJECT_DOMAIN = 'http://YOUR_IP_OR_DOMAIN:8000'
 # Email service
 
 EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend'

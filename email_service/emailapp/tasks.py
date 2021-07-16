@@ -13,11 +13,13 @@ from django.conf import settings
 
 @celery_app.task
 def sending():
+
+    # finding not started available today mailing
     mailings = Mailing.objects.filter(mailing_status=False).filter(mailing_date__lte=date.today())
     if mailings:
         ids = []
+        # sending emails to email_addresses in mailing_list
         for mailing in mailings:
-
             mailinglist = MailingList.objects.get(pk=mailing.mailing_list_id)
             emails = mailinglist.receivers.all()
             for receiver in emails:
@@ -60,4 +62,4 @@ def send_email(pk):
     obj.send_date = datetime.now()
     obj.save()
 
-    return {"status": "success", "email_id":"pk"}
+    return {"status": "success", "email_id":pk}
