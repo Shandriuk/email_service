@@ -54,6 +54,8 @@ python email_service with django
    - mailing-list/*mailing_list_id*/ 
      - GET - get mailing list from database with *mailing_list_id* ID
      - POST - edit mailing list from database with *mailing_list_id* ID
+       - {... "receivers_add": [id1, id2]} - for adding some emails
+       - {... "receivers_remove": [id1, id2]} - for removing some emails
      - DELETE - delete mailing list from database with *mailing_list_id* ID
   
  # 3. Templates interaction
