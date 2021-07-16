@@ -82,7 +82,7 @@ python email_service with django
     
      #### If the mailing has already been done, a list of sent letters with additional information will also be displayed
      
-  # 5. The mailing starts at midnight. Use the following command to launch the available mailing today
+  # 5. The mailing starts at 11 (UTC+3). Use the following command to launch the available mailing today
    - activate_mailing/ 
      - GET - return list of not started mailing
      - POST - starting all available today mailing
